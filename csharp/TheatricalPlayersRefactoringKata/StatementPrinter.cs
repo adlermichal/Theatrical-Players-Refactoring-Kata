@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 namespace TheatricalPlayersRefactoringKata
 {
@@ -85,7 +86,7 @@ namespace TheatricalPlayersRefactoringKata
                 PlayAmounts = playDict
             };
         }
-        
+
         private static decimal GetCurrencyValue(int amount)
         {
             return Convert.ToDecimal(amount / 100);
@@ -97,7 +98,7 @@ namespace TheatricalPlayersRefactoringKata
             CultureInfo cultureInfo = new CultureInfo("en-US");
 
             var summary = CalculatePerformance(invoice, plays);
-            
+
             foreach (var perf in invoice.Performances)
             {
                 var play = plays[perf.PlayID];
@@ -109,6 +110,34 @@ namespace TheatricalPlayersRefactoringKata
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", GetCurrencyValue(summary.TotalAmount));
             result += String.Format("You earned {0} credits\n", summary.VolumeCredits);
             return result;
+        }
+
+        public string PrintHtml(Invoice invoice, Dictionary<string, Play> plays)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("<html>");
+            sb.AppendLine("<body>");
+            sb.AppendLine(string.Format("<h1>Statement for {0}</h1>", invoice.Customer));
+            CultureInfo cultureInfo = new CultureInfo("en-US");
+
+            var summary = CalculatePerformance(invoice, plays);
+
+            sb.AppendLine("<table>");
+            sb.AppendLine("<tr><th>play</th><th>seats</th><th>cost</th></tr>");
+            foreach (var perf in invoice.Performances)
+            {
+                var play = plays[perf.PlayID];
+                var playAmount = summary.PlayAmounts.GetValueOrDefault(play);
+                // print line for this order
+                sb.AppendLine(String.Format(cultureInfo, "<tr><td>{0}</td><td>{2}</td><td>{1:C}</td></tr>", play.Name, GetCurrencyValue(playAmount), perf.Audience));
+            }
+            sb.AppendLine("</table>");
+
+            sb.AppendLine(String.Format(cultureInfo, "<p>Amount owed is <em>{0:C}</em></p>", GetCurrencyValue(summary.TotalAmount)));
+            sb.AppendLine(String.Format("<p>You earned <em>{0}</em> credits</p>", summary.VolumeCredits));
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+            return sb.ToString();
         }
     }
 }
