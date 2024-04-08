@@ -103,15 +103,6 @@ namespace TheatricalPlayersRefactoringKata
                 result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(amount / 100), perf.Audience);
                 totalAmount += amount;
             }
-
-            var newResult = string.Format("Statement for {0}\n", invoice.Customer);
-
-            foreach (var play in summary.PlayAmounts)
-            {
-                var amount = Convert.ToDecimal(play.Value / 100);
-                newResult += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Key.Name, Convert.ToDecimal(amount / 100));
-
-            }
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(summary.TotalAmount / 100));
             result += String.Format("You earned {0} credits\n", summary.VolumeCredits);
             return result;
