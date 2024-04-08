@@ -48,5 +48,10 @@ namespace TheatricalPlayersRefactoringKata
             result += String.Format("You earned {0} credits\n", volumeCredits);
             return result;
         }
+
+        public string PrintAsHTML(Invoice invoice, Dictionary<string, Play> plays)
+        {
+            return "";
+        }
     }
 }
