@@ -6,7 +6,7 @@ namespace TheatricalPlayersRefactoringKata
 {
     public class StatementPrinter
     {
-        private int CalculatePlayVolumeCredits(int perfAudience, string playType)
+        private static int CalculatePlayVolumeCredits(int perfAudience, string playType)
         {
             // add volume credits
             var volumeCredits = Math.Max(perfAudience - 30, 0);
@@ -19,7 +19,7 @@ namespace TheatricalPlayersRefactoringKata
             return volumeCredits;
         }
 
-        public (int, int) CalculatePlay(int perfAudience, string playType)
+        private (int, int) CalculatePlay(int perfAudience, string playType)
         {
             var amount = CalculatePlayAmount(perfAudience, playType);
 
@@ -30,7 +30,7 @@ namespace TheatricalPlayersRefactoringKata
 
         }
 
-        private int CalculatePlayAmount(int perfAudience, string playType)
+        private static int CalculatePlayAmount(int perfAudience, string playType)
         {
             var amount = 0;
             switch (playType)
@@ -59,12 +59,12 @@ namespace TheatricalPlayersRefactoringKata
 
         public class PerformanceSummary
         {
-            public int TotalAmount { get; set; }
-            public int VolumeCredits { get; set; }
-            public Dictionary<Play, int> PlayAmounts { get; set; }
+            public int TotalAmount { get; init; }
+            public int VolumeCredits { get; init; }
+            public Dictionary<Play, int> PlayAmounts { get; init; }
         }
 
-        public PerformanceSummary CalculatePerformance(Invoice invoice, Dictionary<string, Play> plays)
+        private PerformanceSummary CalculatePerformance(Invoice invoice, Dictionary<string, Play> plays)
         {
             var totalAmount = 0;
             var volumeCredits = 0;
@@ -85,25 +85,28 @@ namespace TheatricalPlayersRefactoringKata
                 PlayAmounts = playDict
             };
         }
+        
+        private static decimal GetCurrencyValue(int amount)
+        {
+            return Convert.ToDecimal(amount / 100);
+        }
 
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
             var result = string.Format("Statement for {0}\n", invoice.Customer);
             CultureInfo cultureInfo = new CultureInfo("en-US");
 
-            var totalAmount = 0;
-            var volumeCredits = 0;
             var summary = CalculatePerformance(invoice, plays);
+            
             foreach (var perf in invoice.Performances)
             {
                 var play = plays[perf.PlayID];
-                var (amount, playVolumeCredits) = CalculatePlay(perf.Audience, play.Type);
-                volumeCredits += playVolumeCredits;
+                var playAmount = summary.PlayAmounts.GetValueOrDefault(play);
                 // print line for this order
-                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(amount / 100), perf.Audience);
-                totalAmount += amount;
+                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, GetCurrencyValue(playAmount), perf.Audience);
             }
-            result += String.Format(cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(summary.TotalAmount / 100));
+
+            result += String.Format(cultureInfo, "Amount owed is {0:C}\n", GetCurrencyValue(summary.TotalAmount));
             result += String.Format("You earned {0} credits\n", summary.VolumeCredits);
             return result;
         }
