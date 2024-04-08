@@ -19,6 +19,17 @@ namespace TheatricalPlayersRefactoringKata
             return volumeCredits;
         }
 
+        public (int, int) CalculatePlay(int perfAudience, string playType)
+        {
+            var amount = CalculatePlayAmount(perfAudience, playType);
+
+            // add volume credits
+            var volumeCredits = CalculatePlayVolumeCredits(perfAudience, playType);
+
+            return (amount, volumeCredits);
+
+        }
+
         private int CalculatePlayAmount(int perfAudience, string playType)
         {
             var amount = 0;
@@ -46,6 +57,8 @@ namespace TheatricalPlayersRefactoringKata
             return amount;
         }
 
+
+
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
             var result = string.Format("Statement for {0}\n", invoice.Customer);
@@ -56,11 +69,8 @@ namespace TheatricalPlayersRefactoringKata
             foreach (var perf in invoice.Performances)
             {
                 var play = plays[perf.PlayID];
-                var amount = CalculatePlayAmount(perf.Audience, play.Type);
-
-                // add volume credits
-                volumeCredits += CalculatePlayVolumeCredits(perf.Audience, play.Type);
-
+                var (amount, playVolumeCredits) = CalculatePlay(perf.Audience, play.Type);
+                volumeCredits += playVolumeCredits;
                 // print line for this order
                 result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(amount / 100), perf.Audience);
                 totalAmount += amount;
